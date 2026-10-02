@@ -4,115 +4,193 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ต้นทุนการผลิต — หน้าตัวอย่าง</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root { color-scheme: light; }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: Sarabun, "Noto Sans Thai", sans-serif; background: #fafafa; color: #18181b; }
-    header { position: sticky; top: 0; z-index: 10; height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 16px; background: #fffbeb; border-bottom: 1px solid #fde68a; }
-    h1 { font-size: 16px; margin: 0; }
-    .sub { font-size: 12px; color: #71717a; }
-    main { padding: 16px 20px 40px; }
-    .banner { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 12px; padding: 10px 12px; font-size: 13px; margin-bottom: 16px; }
-    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-    .card { background: #fff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 14px; }
+    body { margin: 0; font-family: Sarabun, "Noto Sans Thai", sans-serif; background: #fff; color: #18181b; }
+    button, input { font-family: inherit; }
+    header { position: sticky; top: 0; z-index: 10; height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; background: #fffbeb; border-bottom: 1px solid #fde68a; }
+    @media (min-width: 768px) { header { padding: 0 24px; } }
+    .title { min-width: 0; display: flex; align-items: baseline; gap: 8px; }
+    h1 { font-size: 16px; font-weight: 600; margin: 0; white-space: nowrap; }
+    .sub { font-size: 12px; color: #71717a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .reload { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #e4e4e7; background: #fff; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    .reload:hover { background: #fafafa; }
+    main { padding: 12px; width: 100%; }
+    @media (min-width: 768px) { main { padding: 20px; } }
+    @media (min-width: 1024px) { main { padding: 24px; } }
+    .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    @media (min-width: 1024px) { .kpis { grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; } }
+    .card { background: #fff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 12px; }
+    @media (min-width: 768px) { .card { padding: 16px; } }
     .card p { margin: 0; }
-    .muted { color: #71717a; font-size: 12px; }
-    .big { font-size: 22px; font-weight: 700; margin-top: 6px; }
-    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
-    .chip { border: 1px solid #e4e4e7; background: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
-    .chip.on { background: #18181b; color: #fff; border-color: #18181b; }
-    table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
-    th, td { border-bottom: 1px solid #f4f4f5; padding: 10px 12px; text-align: left; vertical-align: top; }
-    th { position: sticky; top: 48px; background: #fff; cursor: pointer; font-weight: 500; }
-    tr { cursor: pointer; }
-    tr:hover td { background: #fafafa; }
-    .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-    .red td { background: #fef2f2; }
-    .gray td { background: #f4f4f5; }
-    .strike { text-decoration: line-through; color: #991b1b; }
-    .dim { color: #71717a; }
-    .badge { display: inline-flex; align-items: center; border-radius: 6px; padding: 1px 6px; font-size: 10px; font-weight: 700; margin-right: 4px; }
-    .b-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-    .b-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-    .b-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-    .tag { display: inline-block; border-radius: 999px; border: 1px solid #e4e4e7; padding: 1px 8px; font-size: 11px; margin-right: 4px; }
-    .tiny { font-size: 10px; }
-    .amber { color: #b45309; }
-    .sky { color: #0369a1; }
+    .muted { color: #71717a; }
+    .xs { font-size: 12px; }
+    .tiny { font-size: 10px; line-height: 1.45; }
+    .big { font-size: 20px; font-weight: 700; line-height: 1.2; margin-top: 6px; }
     .green { color: #15803d; }
     .redt { color: #dc2626; }
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.3); display: flex; align-items: flex-end; justify-content: center; }
-    .drawer { background: #fff; width: min(520px, 100%); max-height: 85vh; overflow: auto; border-radius: 16px 16px 0 0; padding: 20px; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .amber { color: #b45309; }
+    .sky { color: #0369a1; }
+    .count { font-size: 14px; color: #71717a; margin: 0 0 12px; }
+    .chips { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+    @media (min-width: 768px) { .chips { flex-wrap: wrap; overflow: visible; padding-bottom: 0; } }
+    .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #e4e4e7; background: #fff; color: #71717a; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+    .chip.issue { color: #18181b; }
+    .chip.on { background: #18181b; color: #fff; border-color: #18181b; }
+    .count-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; font-size: 10px; font-weight: 600; background: #f4f4f5; color: #71717a; }
+    .chip.issue .count-pill { color: #18181b; }
+    .chip.on .count-pill { background: rgba(255,255,255,.2); color: #fff; }
+    .sheet { background: #fff; border: 1px solid #e4e4e7; border-radius: 16px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 12px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid rgba(228,228,231,.5); }
+    th + th, td + td { border-left: 1px solid rgba(228,228,231,.5); }
+    th { position: sticky; top: 48px; z-index: 5; background: #fff; font-size: 16px; font-weight: 400; color: #000; cursor: pointer; user-select: none; }
+    th.plain { cursor: default; }
+    th:hover { background: rgba(244,244,245,.4); }
+    th.plain:hover { background: #fff; }
+    tr.row { cursor: pointer; }
+    tr.row:hover td { background: rgba(244,244,245,.3); }
+    tr.red td { background: rgba(254,242,242,.7); }
+    tr.red:hover td { background: #fef2f2; }
+    tr.gray td { background: #f4f4f5; }
+    tr.gray:hover td { background: #e4e4e7; }
+    .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .seq { text-align: center; width: 56px; font-weight: 600; color: #71717a; }
+    .name { font-weight: 600; line-height: 1.35; }
+    .strike { color: rgba(153,27,27,.8); text-decoration: line-through; text-decoration-color: #fca5a5; }
+    .dim { color: #71717a; }
+    .chev { width: 32px; color: #71717a; padding-left: 8px; padding-right: 8px; }
+    .pill { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid #e4e4e7; padding: 1px 8px; font-size: 12px; font-weight: 500; margin-right: 4px; }
+    .pill-bnl { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .pill-b2b { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+    .pill-bu { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+    .pill-req { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 1px 6px; font-size: 10px; font-weight: 600; }
+    .b-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .b-green { color: #15803d; font-size: 14px; font-weight: 600; }
+    .dot { position: relative; display: inline-flex; width: 6px; height: 6px; flex: none; }
+    .dot i, .dot b { width: 6px; height: 6px; border-radius: 999px; display: block; }
+    .dot.amber i { position: absolute; background: #fbbf24; opacity: .75; animation: ping 1s cubic-bezier(0,0,.2,1) infinite; }
+    .dot.amber b { position: relative; background: #f59e0b; }
+    .dot.green i { position: absolute; background: #34d399; opacity: .75; animation: ping 1s cubic-bezier(0,0,.2,1) infinite; }
+    .dot.green b { position: relative; background: #10b981; }
+    @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+    .cards { display: block; }
+    .desk { display: none; }
+    @media (min-width: 768px) { .cards { display: none; } .desk { display: block; } }
+    .mcard { width: 100%; text-align: left; border: 0; border-bottom: 1px solid rgba(228,228,231,.5); background: #fff; padding: 12px; cursor: pointer; }
+    .mcard.red { background: rgba(254,242,242,.7); }
+    .mcard.gray { background: #f4f4f5; }
+    .mhead { display: flex; gap: 8px; align-items: flex-start; }
+    .sq { width: 32px; height: 32px; border-radius: 12px; background: #3f3f46; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex: none; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 12px; color: #71717a; }
+    .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.3); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+    @media (min-width: 768px) { .overlay { align-items: center; padding: 24px; } }
+    .panel { background: #fff; width: 100%; max-width: 32rem; max-height: 85vh; min-height: 0; flex: 0 1 auto; overflow-y: auto; border-radius: 16px 16px 0 0; box-shadow: 0 20px 40px rgba(0,0,0,.18); padding: 0 20px 20px; }
+    @media (min-width: 768px) { .panel { border-radius: 16px; } }
+    .panel-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding-top: 20px; padding-bottom: 8px; background: #fff; }
+    .x { border: 0; background: transparent; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; color: #71717a; flex: none; }
+    .x:hover { background: rgba(244,244,245,.8); }
+    .note { margin-top: 8px; font-size: 12px; border-radius: 8px; padding: 6px 10px; }
+    .note-red { color: #b91c1c; background: #fef2f2; }
+    .note-amber { color: #b45309; background: #fffbeb; }
+    .note-zinc { color: #71717a; background: #f4f4f5; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
     .box { background: #f4f4f5; border-radius: 12px; padding: 12px; }
-    .note { font-size: 12px; border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
-    button.link { border: 0; background: #fff; border: 1px solid #e4e4e7; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-    @media (max-width: 900px) { .kpis { grid-template-columns: 1fr 1fr; } }
+    .box b { display: block; font-size: 16px; margin-top: 4px; }
+    .block { border: 1px solid #e4e4e7; border-radius: 12px; padding: 12px; margin-top: 12px; }
+    .cmp { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .cmp th, .cmp td { border: 0; padding: 4px 0; }
+    .cmp tr.bold td { border-top: 1px solid #e4e4e7; font-weight: 600; padding-top: 8px; }
+    .line { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 8px; }
+    .ok { color: #16a34a; }
+    .bad { color: #ef4444; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 500; border: 1px solid #e4e4e7; }
+    .sp-green { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .sp-amber { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .sp-orange { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+    .sp-muted { background: #f4f4f5; color: #71717a; }
+    .sample { margin-top: 12px; font-size: 11px; color: #a1a1aa; }
   </style>
 </head>
 <body>
   <header>
-    <div>
+    <div class="title">
       <h1>ต้นทุนการผลิต</h1>
-      <div class="sub">ข้อมูลตัวอย่าง · มุมมองผู้เยี่ยมชม</div>
+      <p class="sub">2 ตุลาคม 2569 · มุมมองผู้เยี่ยมชม · ข้อมูลตัวอย่าง</p>
     </div>
-    <button class="link" id="reload" type="button">โหลดใหม่</button>
+    <button class="reload" id="reload" type="button">↻ โหลดใหม่</button>
   </header>
   <main>
-    <div class="banner">หน้าตัวอย่างสำหรับทีมออกแบบ ตัวเลขไม่ได้มาจากฐานข้อมูล แต่เงื่อนไขการแสดงตรงกับระบบจริง รายละเอียดแต่ละแถวอยู่ในเอกสาร README.md</div>
     <div class="kpis" id="kpis"></div>
-    <p class="muted" id="count"></p>
+    <p class="count" id="count"></p>
     <div class="chips" id="chips"></div>
-    <div style="border:1px solid #e4e4e7;border-radius:16px;overflow:hidden">
-      <table>
-        <thead>
-          <tr>
-            <th data-key="jobSequence">ลำดับ</th>
-            <th data-key="jobName">สินค้า</th>
-            <th>สถานะ / ขั้นตอน</th>
-            <th>ผู้ปฏิบัติงาน</th>
-            <th data-key="timeUsedMinutes" class="num">เวลา</th>
-            <th data-key="materialCost" class="num">RM</th>
-            <th data-key="laborCost" class="num">LM</th>
-            <th data-key="totalCost" class="num">ต้นทุนรวม</th>
-            <th data-key="outputQty" class="num">จำนวนที่ผลิตได้</th>
-            <th data-key="yieldPercent" class="num">% Yield</th>
-            <th>หมวดหมู่</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
+    <div class="sheet">
+      <div class="cards" id="cards"></div>
+      <div class="desk">
+        <table>
+          <thead>
+            <tr>
+              <th data-key="jobSequence" class="num">ลำดับ <span data-sort="jobSequence"></span></th>
+              <th data-key="jobName">สินค้า <span data-sort="jobName"></span></th>
+              <th class="plain">สถานะ / ขั้นตอน</th>
+              <th class="plain">ผู้ปฏิบัติงาน</th>
+              <th data-key="timeUsedMinutes" class="num">เวลา <span data-sort="timeUsedMinutes"></span></th>
+              <th data-key="materialCost" class="num">RM <span data-sort="materialCost"></span></th>
+              <th data-key="laborCost" class="num">LM <span data-sort="laborCost"></span></th>
+              <th data-key="totalCost" class="num">ต้นทุนรวม <span data-sort="totalCost"></span></th>
+              <th data-key="outputQty" class="num">จำนวนที่ผลิตได้ <span data-sort="outputQty"></span></th>
+              <th data-key="yieldPercent" class="num">% Yield <span data-sort="yieldPercent"></span></th>
+              <th class="plain">หมวดหมู่</th>
+              <th class="plain chev"></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
     </div>
   </main>
   <div id="drawer"></div>
   <script>
     const WAGE = 450
     const DAY_MINUTES = 495
+    const CATEGORY = { production: "งาน Production", repack: "งาน Repack", vegetable: "งานทำผัก", requisition: "งานเบิกของ", formula: "งานตวงสูตร", other: "อื่น ๆ" }
+    const NEED = {
+      production: { material: true, timer: true, output: true },
+      repack: { material: true, timer: true, output: true },
+      vegetable: { material: false, timer: true, output: false },
+      requisition: { material: false, timer: true, output: false },
+      formula: { material: false, timer: true, output: false },
+      other: { material: false, timer: true, output: false }
+    }
     const base = [
-      { id:"1", jobSequence:1, jobCode:"135126", jobName:"ซอสผัดผงกะหรี่ (ตัวอย่าง)", operators:["ป้าน้อย"], productCategories:["BNL"], jobCategory:"production", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"saved", materialCost:842.5, laborCost:180, totalCost:1022.5, hasStandardTime:true, standardTotalCost:924.32, outputQty:50, outputUnit:"แพ็ค", yieldPercent:96.2, timeUsedSeconds:95*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:true, hasTimerData:true, hasOutputQty:true, costReliabilityPercent:100, mockReason:"ต้นทุนจริง ผลิตเสร็จ ข้อมูลครบ" },
-      { id:"2", jobSequence:2, jobCode:"235225", jobName:"ลาบทอด - เจ (ตัวอย่าง)", operators:["พี่ภา","สาม","จรัญ","RD"], productCategories:["B2B"], jobCategory:"production", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"เริ่มต้นผลิต-สิ้นสุดการผลิต", costSource:"estimated", materialCost:9.45, hasStandardTime:false, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:3*3600, timeSource:"actual", live:true, timerStatus:"warn", hasMaterialWeighing:true, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:33, mockReason:"กำลังผลิต เวลาและ LM วิ่งทุกวินาที ต้องตรวจสอบเวลา และข้อมูลไม่ครบ" },
-      { id:"3", jobSequence:3, jobCode:"235045", jobName:"ห่อหมกเจ (ตัวอย่าง)", operators:["พี่ตุ่น"], productCategories:["BNL"], jobCategory:"production", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"saved", materialCost:640, laborCost:210, totalCost:850, hasStandardTime:true, standardTotalCost:900, outputQty:12, outputUnit:"กก.", yieldPercent:62.4, timeUsedSeconds:140*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:true, hasTimerData:true, hasOutputQty:true, costReliabilityPercent:100, mockReason:"Yield ต่ำกว่า 75 ตัวกรอง Yield ต่ำจะเจอแถวนี้" },
-      { id:"4", jobSequence:4, jobCode:"235032", jobName:"อกไก่หมัก (ตัวอย่าง)", operators:["สาม"], productCategories:["BUย่อย"], jobCategory:"production", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"หมัก", costSource:"estimated", materialCost:null, laborCost:38.18, totalCost:38.18, hasStandardTime:true, standardTotalCost:216.92, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:42*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:true, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:33, zeroPrice:true, mockReason:"ตวงสูตรแล้ว แต่ RM ยังไม่มีราคา" },
-      { id:"5", jobSequence:5, jobCode:"305005R", jobName:"กุ้งต้มยำ Repack (ตัวอย่าง)", operators:["จรัญ"], productCategories:["B2B"], jobCategory:"repack", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:null, costSource:"none", materialCost:null, laborCost:null, totalCost:null, hasStandardTime:true, standardTotalCost:54.55, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:null, timeSource:null, live:false, timerStatus:"no_data", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัสลงท้าย R เป็นกลุ่ม repack ยังไม่มีเวลาผลิตจึงยังไม่แสดงต้นทุนรวม" },
-      { id:"6", jobSequence:6, jobCode:"83", jobName:"หมักไก่ (ตัวอย่างยกเลิก)", operators:["พี่ภา"], productCategories:["BNL"], jobCategory:"other", isCancelled:true, isFinished:false, productionStatusName:"ยกเลิก", currentStepName:null, costSource:"none", materialCost:null, laborCost:null, totalCost:null, hasStandardTime:false, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:null, timeSource:null, live:false, timerStatus:"no_data", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"status_id 9 แถวแดง ไม่เอามารวมในการ์ดต้นทุน" },
-      { id:"7", jobSequence:7, jobCode:"A", jobName:"เบิกของส่งสาขา-ผัก (ตัวอย่าง)", operators:["ป้าน้อย","เอ"], productCategories:["เบิกของ"], jobCategory:"requisition", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"estimated", materialCost:null, laborCost:134.55, totalCost:134.55, hasStandardTime:true, standardTotalCost:54.55, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:74*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:false, hasTimerData:true, hasOutputQty:false, costReliabilityPercent:100, mockReason:"ตัวแรกของรหัสเป็น A คือกลุ่มเบิกของ หมวดไม่ใช่ BNL/B2B/BU จึงเป็นแถวเทา" },
-      { id:"8", jobSequence:8, jobCode:"153005", jobName:"ผักตัวอย่าง", operators:["เอ"], productCategories:[], jobCategory:"vegetable", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"ล้าง", costSource:"estimated", materialCost:null, laborCost:40, totalCost:40, hasStandardTime:false, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:44*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัสขึ้นต้น 153005 เป็นงานทำผัก กลุ่มนี้บังคับเฉพาะเวลา" },
-      { id:"9", jobSequence:9, jobCode:"D", jobName:"ตวงสูตร (ตัวอย่าง)", operators:["พี่ภา","หน่อย"], productCategories:[], jobCategory:"formula", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:null, costSource:"estimated", materialCost:null, laborCost:180, totalCost:180, hasStandardTime:false, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:99*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:false, hasTimerData:true, hasOutputQty:false, costReliabilityPercent:100, mockReason:"ตัวแรกของรหัสเป็น D คือกลุ่มตวงสูตร" },
-      { id:"10", jobSequence:10, jobCode:"1000", jobName:"งานธุรการ (ตัวอย่าง)", operators:["โอเล่","แจ็ค"], productCategories:[], jobCategory:"other", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"งานธุรการ", costSource:"estimated", materialCost:null, laborCost:214.55, totalCost:214.55, hasStandardTime:true, standardTotalCost:763.64, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:118*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัส 1000 เป็นกลุ่มอื่น และมีเวลามาตรฐานให้เทียบ" }
+      { id:"1", jobSequence:1, jobCode:"135126", jobName:"ซอสผัดผงกะหรี่ (ตัวอย่าง)", operators:["ป้าน้อย"], productCategories:["BNL"], jobCategory:"production", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"saved", materialCost:842.5, laborCost:180, totalCost:1022.5, hasStandardTime:true, standardMinutes:90, standardLaborCost:81.82, standardTotalCost:924.32, outputQty:50, outputUnit:"แพ็ค", yieldPercent:96.2, timeUsedSeconds:95*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:true, hasTimerData:true, hasOutputQty:true, costReliabilityPercent:100, mockReason:"ต้นทุนจริง ผลิตเสร็จ ข้อมูลครบ" },
+      { id:"2", jobSequence:2, jobCode:"235225", jobName:"ลาบทอด - เจ (ตัวอย่าง)", operators:["พี่ภา","สาม","จรัญ","RD"], productCategories:["B2B"], jobCategory:"production", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"เริ่มต้นผลิต-สิ้นสุดการผลิต", costSource:"estimated", materialCost:9.45, laborCost:null, totalCost:null, hasStandardTime:false, standardMinutes:null, standardLaborCost:null, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:3*3600, timeSource:"actual", live:true, timerStatus:"warn", hasMaterialWeighing:true, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:33, mockReason:"กำลังผลิต เวลาและ LM วิ่งทุกวินาที ต้องตรวจสอบเวลา และข้อมูลไม่ครบ" },
+      { id:"3", jobSequence:3, jobCode:"235045", jobName:"ห่อหมกเจ (ตัวอย่าง)", operators:["พี่ตุ่น"], productCategories:["BNL"], jobCategory:"production", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"saved", materialCost:640, laborCost:210, totalCost:850, hasStandardTime:true, standardMinutes:286, standardLaborCost:260, standardTotalCost:900, outputQty:12, outputUnit:"กก.", yieldPercent:62.4, timeUsedSeconds:140*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:true, hasTimerData:true, hasOutputQty:true, costReliabilityPercent:100, mockReason:"Yield ต่ำกว่า 75 ตัวกรอง Yield ต่ำจะเจอแถวนี้" },
+      { id:"4", jobSequence:4, jobCode:"235032", jobName:"อกไก่หมัก (ตัวอย่าง)", operators:["สาม"], productCategories:["BUย่อย"], jobCategory:"production", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"หมัก", costSource:"estimated", materialCost:null, laborCost:38.18, totalCost:38.18, hasStandardTime:true, standardMinutes:239, standardLaborCost:216.92, standardTotalCost:216.92, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:42*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:true, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:33, mockReason:"ตวงสูตรแล้ว แต่ RM ยังไม่มีราคา" },
+      { id:"5", jobSequence:5, jobCode:"305005R", jobName:"กุ้งต้มยำ Repack (ตัวอย่าง)", operators:["จรัญ"], productCategories:["B2B"], jobCategory:"repack", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:null, costSource:"none", materialCost:null, laborCost:null, totalCost:null, hasStandardTime:true, standardMinutes:60, standardLaborCost:54.55, standardTotalCost:54.55, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:null, timeSource:null, live:false, timerStatus:"no_data", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัสลงท้าย R เป็นกลุ่ม repack ยังไม่มีเวลาผลิตจึงยังไม่แสดงต้นทุนรวม" },
+      { id:"6", jobSequence:6, jobCode:"83", jobName:"หมักไก่ (ตัวอย่างยกเลิก)", operators:["พี่ภา"], productCategories:["BNL"], jobCategory:"other", isCancelled:true, isFinished:false, productionStatusName:"ยกเลิก", currentStepName:null, costSource:"none", materialCost:null, laborCost:null, totalCost:null, hasStandardTime:false, standardMinutes:null, standardLaborCost:null, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:null, timeSource:null, live:false, timerStatus:"no_data", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"status_id 9 แถวแดง ไม่เอามารวมในการ์ดต้นทุน" },
+      { id:"7", jobSequence:7, jobCode:"A", jobName:"เบิกของส่งสาขา-ผัก (ตัวอย่าง)", operators:["ป้าน้อย","เอ"], productCategories:["เบิกของ"], jobCategory:"requisition", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"estimated", materialCost:null, laborCost:134.55, totalCost:134.55, hasStandardTime:true, standardMinutes:30, standardLaborCost:54.55, standardTotalCost:54.55, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:74*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:false, hasTimerData:true, hasOutputQty:false, costReliabilityPercent:100, mockReason:"ตัวแรกของรหัสเป็น A คือกลุ่มเบิกของ หมวดไม่ใช่ BNL/B2B/BU จึงเป็นแถวเทา" },
+      { id:"8", jobSequence:8, jobCode:"153005", jobName:"ผักตัวอย่าง", operators:["เอ"], productCategories:[], jobCategory:"vegetable", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"ล้าง", costSource:"estimated", materialCost:null, laborCost:40, totalCost:40, hasStandardTime:false, standardMinutes:null, standardLaborCost:null, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:44*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัสขึ้นต้น 153005 เป็นงานทำผัก กลุ่มนี้บังคับเฉพาะเวลา" },
+      { id:"9", jobSequence:9, jobCode:"D", jobName:"ตวงสูตร (ตัวอย่าง)", operators:["พี่ภา","หน่อย"], productCategories:[], jobCategory:"formula", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:null, costSource:"estimated", materialCost:null, laborCost:180, totalCost:180, hasStandardTime:false, standardMinutes:null, standardLaborCost:null, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:99*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:false, hasTimerData:true, hasOutputQty:false, costReliabilityPercent:100, mockReason:"ตัวแรกของรหัสเป็น D คือกลุ่มตวงสูตร" },
+      { id:"10", jobSequence:10, jobCode:"1000", jobName:"งานธุรการ (ตัวอย่าง)", operators:["โอเล่","แจ็ค"], productCategories:[], jobCategory:"other", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"งานธุรการ", costSource:"estimated", materialCost:null, laborCost:214.55, totalCost:214.55, hasStandardTime:true, standardMinutes:420, standardLaborCost:763.64, standardTotalCost:763.64, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:118*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัส 1000 เป็นกลุ่มอื่น และมีเวลามาตรฐานให้เทียบ" }
     ]
 
     const liveAnchor = { at: Date.now(), base: base.find((row) => row.live).timeUsedSeconds }
     let filter = "all"
     let sort = { key: "jobSequence", dir: "asc" }
-    let selected = null
+    let selectedId = null
 
     function money(value) {
       if (value == null) return "—"
       return "฿" + value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     }
     function clock(seconds) {
-      if (seconds == null || seconds <= 0) return "—"
-      const safe = Math.floor(seconds)
+      const safe = Math.max(0, Math.floor(seconds))
       const h = Math.floor(safe / 3600)
       const m = Math.floor((safe % 3600) / 60)
       const s = safe % 60
@@ -128,13 +206,14 @@
       if (parts.length === 0) parts.push("1 น.")
       return parts.join(" ")
     }
+    function duration(item) { return item.live ? clock(item.timeUsedSeconds) : hm(item.timeUsedSeconds) }
     function tracked(item) {
-      return item.productCategories.some((label) => ["BNL","B2B","BU","BUย่อย"].includes(label.toUpperCase()))
+      return item.productCategories.some((label) => ["BNL", "B2B", "BU", "BUย่อย"].includes(label.toUpperCase()))
     }
-    function shownYield(item) {
-      if (item.materialCost == null || item.materialCost <= 0) return null
-      return item.yieldPercent
-    }
+    function hasRm(item) { return item.materialCost != null && item.materialCost > 0 }
+    function shownYield(item) { return hasRm(item) ? item.yieldPercent : null }
+    function zeroPrice(item) { return item.hasMaterialWeighing && !hasRm(item) && !item.isCancelled }
+    function noStandard(item) { return !item.isCancelled && item.costSource !== "saved" && tracked(item) && !item.hasStandardTime }
     function displayItems() {
       const now = Date.now()
       return base.map((item) => {
@@ -154,8 +233,8 @@
     function sorted(items) {
       const key = sort.key
       return [...items].sort((a, b) => {
-        const av = key === "yieldPercent" ? shownYield(a) : a[key]
-        const bv = key === "yieldPercent" ? shownYield(b) : b[key]
+        const av = key === "yieldPercent" ? shownYield(a) : key === "timeUsedMinutes" ? a.timeUsedSeconds : a[key]
+        const bv = key === "yieldPercent" ? shownYield(b) : key === "timeUsedMinutes" ? b.timeUsedSeconds : b[key]
         if (av == null && bv == null) return 0
         if (av == null) return 1
         if (bv == null) return -1
@@ -163,35 +242,70 @@
         return sort.dir === "asc" ? cmp : -cmp
       })
     }
-    function statusHtml(item) {
+    function pill(label) {
+      const key = label.toUpperCase()
+      const tone = key === "BNL" ? "pill-bnl" : key === "B2B" ? "pill-b2b" : key === "BU" || key === "BUย่อย" ? "pill-bu" : key === "เบิกของ" ? "pill-req" : ""
+      return '<span class="pill ' + tone + '">' + label + "</span>"
+    }
+    function pills(item) {
+      return item.productCategories.length ? item.productCategories.map(pill).join("") : '<span class="muted">—</span>'
+    }
+    function rowClass(item) { return item.isCancelled ? "red" : tracked(item) ? "" : "gray" }
+    function nameClass(item) { return item.isCancelled ? "name strike" : tracked(item) ? "name" : "name dim" }
+    function statusCell(item) {
+      if (item.isCancelled) return '<span class="badge b-red">' + (item.productionStatusName || "ยกเลิก") + "</span>"
+      if (item.isFinished) return '<span class="b-green">✓ ผลิตเสร็จแล้ว</span>'
+      const step = item.currentStepName || (item.live ? "กำลังผลิต" : "")
+      if (step) return '<span style="display:inline-flex;align-items:flex-start;gap:6px"><span class="dot amber"><i></i><b></b></span><span>' + step + "</span></span>"
+      return '<span class="muted">—</span>'
+    }
+    function timeCell(item) {
+      const text = duration(item)
+      if (text === "—") return '<span class="muted">—</span>'
+      const dot = item.live ? '<span class="dot green"><i></i><b></b></span>' : ""
+      const label = item.timeSource === "actual" ? '<div class="tiny" style="font-weight:700">เวลาผลิต</div>' : item.timeSource === "standard" ? '<div class="tiny amber" style="font-weight:700">เวลามาตรฐาน</div>' : ""
+      const liveAttr = item.live ? ' data-live="time"' : ""
+      return '<div style="display:inline-flex;flex-direction:column;align-items:flex-end"><span style="display:inline-flex;align-items:center;gap:6px">' + dot + '<span' + liveAttr + ">" + text + "</span></span>" + label + "</div>"
+    }
+    function totalCell(item) {
+      const source = item.costSource === "saved" && item.totalCost != null ? '<div class="tiny muted">ต้นทุนจริง</div>' : item.costSource === "estimated" && item.totalCost != null ? '<div class="tiny amber">ประมาณการ</div>' : ""
+      const standard = item.standardTotalCost != null ? '<div class="tiny muted">มาตรฐาน ' + money(item.standardTotalCost) + "</div>" : ""
+      const missing = noStandard(item) ? '<div class="tiny amber">ยังไม่มีเวลามาตรฐาน</div>' : ""
+      const liveAttr = item.live ? ' data-live="total"' : ""
+      return '<div class="num"><b' + liveAttr + ">" + money(item.totalCost) + "</b>" + source + standard + missing + "</div>"
+    }
+    function outputText(item) {
+      if (item.outputQty == null) return '<span class="muted">—</span>'
+      return item.outputQty + (item.outputUnit ? ' <span class="muted">' + item.outputUnit + "</span>" : "")
+    }
+    function yieldText(item) {
+      const value = shownYield(item)
+      if (value == null) return ""
+      return '<span class="' + (value >= 75 ? "green" : "redt") + '">' + value.toFixed(1) + "%</span>"
+    }
+    function reliabilityPill(percent) {
+      const tone = percent >= 100 ? "sp-green" : percent >= 67 ? "sp-amber" : percent >= 34 ? "sp-orange" : "sp-muted"
+      return '<span class="status-pill ' + tone + '">' + percent + "%</span>"
+    }
+    function timerPill(status) {
+      if (status === "ok") return '<span class="status-pill sp-green">ปกติ</span>'
+      if (status === "warn") return '<span class="status-pill sp-amber">ตรวจสอบเวลา</span>'
+      return '<span class="status-pill sp-muted">ไม่มีข้อมูล</span>'
+    }
+    function jobBadges(item) {
       const bits = []
       if (item.isCancelled) bits.push('<span class="badge b-red">' + (item.productionStatusName || "ยกเลิก") + "</span>")
-      if (item.isFinished && !item.isCancelled) bits.push('<span class="badge b-green">ผลิตเสร็จแล้ว</span>')
-      if (item.live) bits.push('<span class="badge b-amber">กำลังผลิต</span>')
-      if (item.currentStepName) bits.push('<div class="tiny">' + item.currentStepName + "</div>")
-      if (!item.hasStandardTime && !item.isCancelled && item.costSource !== "saved" && tracked(item)) bits.push('<div class="tiny amber">ยังไม่มีเวลามาตรฐาน</div>')
-      if (item.zeroPrice) bits.push('<div class="tiny amber">วัตถุดิบยังไม่มีราคา</div>')
-      return bits.join("") || '<span class="dim">—</span>'
+      if (item.isFinished && !item.isCancelled) bits.push('<span class="badge" style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0">✓ ผลิตเสร็จแล้ว</span>')
+      if (item.live) bits.push('<span class="badge" style="background:#fffbeb;color:#b45309;border:1px solid #fde68a"><span class="dot amber"><i></i><b></b></span> กำลังผลิต</span>')
+      const notes = []
+      if (item.costSource === "saved") notes.push('<div class="tiny sky">ต้นทุนจริง</div>')
+      if (noStandard(item)) notes.push('<div class="tiny amber">ยังไม่มีเวลามาตรฐาน</div>')
+      if (zeroPrice(item)) notes.push('<div class="tiny amber">วัตถุดิบยังไม่มีราคา</div>')
+      if (!bits.length && !notes.length) return ""
+      return '<div style="margin-top:8px">' + bits.join(" ") + notes.join("") + "</div>"
     }
-    function render() {
-      const items = displayItems()
+    function paintList(items) {
       const view = sorted(filtered(items))
-      const costItems = items.filter((item) => !item.isCancelled)
-      const total = costItems.reduce((sum, item) => sum + (item.totalCost || 0), 0)
-      const rm = costItems.reduce((sum, item) => sum + (item.materialCost || 0), 0)
-      const lm = costItems.reduce((sum, item) => sum + (item.laborCost || 0), 0)
-      const saved = costItems.filter((item) => item.costSource === "saved").reduce((sum, item) => sum + (item.totalCost || 0), 0)
-      const estimated = costItems.filter((item) => item.costSource === "estimated" && item.totalCost != null).reduce((sum, item) => sum + item.totalCost, 0)
-      const yields = costItems.map(shownYield).filter((value) => value != null)
-      const avg = yields.length ? yields.reduce((sum, value) => sum + value, 0) / yields.length : null
-      const complete = costItems.filter((item) => item.costReliabilityPercent === 100).length
-      const warn = costItems.filter((item) => item.timerStatus === "warn").length
-      document.getElementById("kpis").innerHTML = [
-        ["ต้นทุนรวมวันนี้", money(total), "RM " + money(rm) + " · LM " + money(lm) + "<br>จริง " + money(saved || null) + " · ประมาณการ " + money(estimated || null)],
-        ["Yield เฉลี่ย", avg == null ? "—" : avg.toFixed(1) + "%", "เฉพาะแถวที่มี RM"],
-        ["ข้อมูลครบ", complete + " / " + costItems.length, "ความถูกต้องต้นทุนเท่ากับ 100"],
-        ["ต้องตรวจสอบ", warn > 0 ? warn + " รายการ" : "ปกติ", "สถานะเวลาเป็นต้องตรวจสอบ"]
-      ].map(([label, value, note]) => '<div class="card"><p class="muted">' + label + '</p><p class="big">' + value + '</p><p class="tiny muted">' + note + "</p></div>").join("")
       document.getElementById("count").textContent = "แสดง " + view.length + "/" + items.length + " รายการ"
       const counts = {
         all: items.length,
@@ -200,49 +314,164 @@
         low_yield: items.filter((item) => { const y = shownYield(item); return y != null && y < 75 }).length
       }
       document.getElementById("chips").innerHTML = [
-        ["all","ทั้งหมด"],["warn","ต้องตรวจสอบเวลา"],["incomplete","ข้อมูลไม่ครบ"],["low_yield","Yield ต่ำ"]
-      ].map(([key, label]) => '<button class="chip' + (filter === key ? " on" : "") + '" data-filter="' + key + '">' + label + " " + counts[key] + "</button>").join("")
-      document.getElementById("rows").innerHTML = view.map((item) => {
-        const rowClass = item.isCancelled ? "red" : tracked(item) ? "" : "gray"
-        const nameClass = item.isCancelled ? "strike" : tracked(item) ? "" : "dim"
-        const time = item.live ? clock(item.timeUsedSeconds) : hm(item.timeUsedSeconds)
-        const source = item.costSource === "saved" ? '<div class="tiny sky">ต้นทุนจริง</div>' : item.costSource === "estimated" ? '<div class="tiny amber">ประมาณการ</div>' : ""
-        const standard = item.standardTotalCost != null ? '<div class="tiny muted">มาตรฐาน ' + money(item.standardTotalCost) + "</div>" : ""
-        const yieldText = shownYield(item) == null ? "" : '<span class="' + (shownYield(item) >= 75 ? "green" : "redt") + '">' + shownYield(item).toFixed(1) + "%</span>"
-        const tags = item.productCategories.map((label) => '<span class="tag">' + label + "</span>").join("") || '<span class="dim">—</span>'
-        return '<tr data-id="' + item.id + '" class="' + rowClass + '"><td class="num">' + item.jobSequence + '</td><td><div class="' + nameClass + '"><b>' + item.jobName + '</b></div><div class="tiny muted">' + item.jobCode + '</div></td><td>' + statusHtml(item) + '</td><td>' + item.operators.join(", ") + '</td><td class="num">' + time + (item.timeSource === "actual" ? '<div class="tiny">เวลาผลิต</div>' : "") + '</td><td class="num">' + money(item.materialCost) + (item.zeroPrice ? '<div class="tiny amber">วัตถุดิบยังไม่มีราคา</div>' : "") + '</td><td class="num">' + money(item.laborCost) + '</td><td class="num"><b>' + money(item.totalCost) + "</b>" + source + standard + '</td><td class="num">' + (item.outputQty == null ? "—" : item.outputQty + " " + (item.outputUnit || "")) + '</td><td class="num">' + yieldText + "</td><td>" + tags + "</td></tr>"
+        ["all", "ทั้งหมด"], ["warn", "ต้องตรวจสอบเวลา"], ["incomplete", "ข้อมูลไม่ครบ"], ["low_yield", "Yield ต่ำ"]
+      ].map(([key, label]) => {
+        const on = filter === key
+        const issue = key !== "all" && counts[key] > 0
+        return '<button class="chip' + (on ? " on" : issue ? " issue" : "") + '" data-filter="' + key + '" type="button">' + label + '<span class="count-pill">' + counts[key] + "</span></button>"
       }).join("")
-      if (selected) openDrawer(displayItems().find((item) => item.id === selected) || null)
+      document.querySelectorAll("[data-sort]").forEach((node) => {
+        const key = node.getAttribute("data-sort")
+        node.textContent = sort.key === key ? (sort.dir === "asc" ? "↑" : "↓") : "↕"
+      })
+      document.getElementById("rows").innerHTML = view.map((item) => {
+        const rmNote = zeroPrice(item) ? '<div class="tiny amber">วัตถุดิบยังไม่มีราคา</div>' : ""
+        const lmAttr = item.live ? ' data-live="lm"' : ""
+        return '<tr class="row ' + rowClass(item) + '" data-id="' + item.id + '">' +
+          '<td class="seq">' + item.jobSequence + "</td>" +
+          '<td><div class="' + nameClass(item) + '">' + item.jobName + '</div><div class="tiny muted">' + item.jobCode + "</div></td>" +
+          "<td>" + statusCell(item) + "</td>" +
+          "<td" + (tracked(item) || item.isCancelled ? "" : ' class="dim"') + ">" + item.operators.join(", ") + "</td>" +
+          '<td class="num">' + timeCell(item) + "</td>" +
+          '<td class="num">' + money(item.materialCost) + rmNote + "</td>" +
+          '<td class="num"><span' + lmAttr + ">" + money(item.laborCost) + "</span></td>" +
+          "<td>" + totalCell(item) + "</td>" +
+          '<td class="num">' + outputText(item) + "</td>" +
+          '<td class="num">' + yieldText(item) + "</td>" +
+          "<td>" + pills(item) + "</td>" +
+          '<td class="chev">›</td></tr>'
+      }).join("")
+      document.getElementById("cards").innerHTML = view.map((item) => {
+        return '<button class="mcard ' + rowClass(item) + '" data-id="' + item.id + '" type="button"><div class="mhead"><div class="sq">' + item.jobSequence + '</div><div style="flex:1;min-width:0"><div class="' + nameClass(item) + '">' + item.jobName + '</div><div class="tiny muted">' + [item.jobCode, item.operators.join(", ")].filter(Boolean).join(" · ") + "</div>" + (item.currentStepName ? '<div class="tiny">ขั้นตอนล่าสุด: ' + item.currentStepName + "</div>" : "") + "<div>" + jobBadges(item) + '</div></div><div>' + totalCell(item) + '</div></div><div class="meta">' + pills(item) + "<span>" + outputText(item) + "</span><span>" + timeCell(item) + "</span>" + (hasRm(item) ? '<span class="' + (shownYield(item) >= 75 ? "green" : "redt") + '">Yield ' + shownYield(item).toFixed(1) + "%</span>" : "") + "<span>RM " + money(item.materialCost) + "</span><span>LM " + money(item.laborCost) + "</span>" + reliabilityPill(item.costReliabilityPercent) + (item.timerStatus !== "ok" ? timerPill(item.timerStatus) : "") + "</div></button>"
+      }).join("")
+    }
+    function paintKpis(items) {
+      const costItems = items.filter((item) => !item.isCancelled)
+      const cancelled = items.length - costItems.length
+      const total = costItems.reduce((sum, item) => sum + (item.totalCost || 0), 0)
+      const rm = costItems.reduce((sum, item) => sum + (item.materialCost || 0), 0)
+      const lm = costItems.reduce((sum, item) => sum + (item.laborCost || 0), 0)
+      const saved = costItems.filter((item) => item.costSource === "saved").reduce((sum, item) => sum + (item.totalCost || 0), 0)
+      const estimated = costItems.filter((item) => item.costSource === "estimated" && item.totalCost != null).reduce((sum, item) => sum + item.totalCost, 0)
+      const comparable = costItems.filter((item) => item.totalCost != null && item.standardTotalCost != null)
+      const comparableActual = comparable.reduce((sum, item) => sum + item.totalCost, 0)
+      const comparableStandard = comparable.reduce((sum, item) => sum + item.standardTotalCost, 0)
+      const yields = costItems.map(shownYield).filter((value) => value != null)
+      const avg = yields.length ? yields.reduce((sum, value) => sum + value, 0) / yields.length : null
+      const complete = costItems.filter((item) => item.costReliabilityPercent === 100).length
+      const warn = costItems.filter((item) => item.timerStatus === "warn").length
+      const allComplete = costItems.length > 0 && complete === costItems.length
+      document.getElementById("kpis").innerHTML =
+        '<div class="card"><p class="xs muted">ต้นทุนรวมวันนี้</p><p class="big">' + (total > 0 ? money(total) : "—") + '</p><p class="tiny muted">RM ' + money(rm > 0 ? rm : null) + " · LM " + money(lm > 0 ? lm : null) + '</p><p class="tiny"><span class="sky">จริง ' + money(saved > 0 ? saved : null) + '</span> · <span class="amber">ประมาณการ ' + money(estimated > 0 ? estimated : null) + "</span>" + (cancelled ? ' · <span class="redt">ยกเลิก ' + cancelled + " งาน</span>" : "") + "</p>" + (comparable.length ? '<p class="tiny muted" style="margin-top:6px;padding-top:6px;border-top:1px solid #e4e4e7">เทียบมาตรฐาน (' + comparable.length + " งาน): จริง " + money(comparableActual) + " · มาตรฐาน " + money(comparableStandard) + "</p>" : "") + "</div>" +
+        '<div class="card"><p class="xs muted">Yield เฉลี่ย</p><p class="big ' + (avg == null ? "muted" : avg >= 75 ? "green" : "redt") + '">' + (avg == null ? "—" : avg.toFixed(1) + "%") + "</p></div>" +
+        '<div class="card"><p class="xs muted">ข้อมูลครบ</p><p class="big ' + (allComplete ? "green" : "amber") + '">' + complete + '<span style="font-size:16px;font-weight:400;color:#71717a">/' + costItems.length + '</span> <span style="font-size:14px;font-weight:400;color:#71717a">รายการ</span></p></div>' +
+        '<div class="card" style="' + (warn > 0 ? "background:#fffbeb;border-color:#fde68a" : "background:#f0fdf4;border-color:#bbf7d0") + '"><p class="xs muted">ต้องตรวจสอบ</p><p class="big ' + (warn > 0 ? "amber" : "green") + '">' + (warn > 0 ? warn + ' <span style="font-size:14px;font-weight:400;color:#71717a">รายการ</span>' : "ปกติ") + "</p></div>"
+    }
+    function checkRow(label, done, required) {
+      const mark = !required ? '<span class="muted" style="width:16px;text-align:center">—</span>' : done ? '<span class="ok">✓</span>' : '<span class="bad">✕</span>'
+      const tone = required ? (done ? "" : "muted") : "muted"
+      return '<div class="line">' + mark + "<span class=\"" + tone + "\">" + label + (required ? "" : ' <span class="tiny">(ไม่บังคับ)</span>') + "</span></div>"
     }
     function openDrawer(item) {
-      selected = item && item.id
-      const host = document.getElementById("drawer")
-      if (!item) { host.innerHTML = ""; return }
-      host.innerHTML = '<div class="overlay"><div class="drawer"><h2 style="margin:0">' + item.jobName + '</h2><p class="muted">ลำดับ ' + item.jobSequence + " · " + item.jobCode + " · กลุ่ม " + item.jobCategory + '</p><div class="note" style="background:#fffbeb">แถวตัวอย่างนี้โชว์: ' + item.mockReason + '</div>' + statusHtml(item) + '<div class="grid" style="margin-top:12px"><div class="box"><div class="muted">RM</div><b>' + money(item.materialCost) + '</b></div><div class="box"><div class="muted">LM</div><b>' + money(item.laborCost) + '</b></div><div class="box"><div class="muted">ต้นทุนรวม</div><b>' + money(item.totalCost) + '</b></div><div class="box"><div class="muted">มาตรฐาน</div><b>' + money(item.standardTotalCost) + '</b></div></div><p class="muted">ความถูกต้องต้นทุน ' + item.costReliabilityPercent + '% · ราคาวัตถุดิบ ' + (item.hasMaterialWeighing ? "มี" : "ไม่มี") + " · เวลาครบ " + (item.hasTimerData ? "มี" : "ไม่มี") + " · ผลผลิต " + (item.hasOutputQty ? "มี" : "ไม่มี") + '</p><button class="link" id="close" type="button">ปิด</button></div></div>'
-      host.querySelector(".overlay").addEventListener("click", (event) => { if (event.target === host.querySelector(".overlay")) { selected = null; render() } })
-      host.querySelector("#close").addEventListener("click", () => { selected = null; render() })
+      selectedId = item.id
+      document.body.style.overflow = "hidden"
+      const need = NEED[item.jobCategory]
+      const timeLabel = item.timeSource === "standard" ? "เวลามาตรฐาน" : item.timeSource === "actual" ? "เวลาผลิต" : "เวลา"
+      const fields = [
+        ["ปริมาณผลผลิต", item.outputQty == null ? "—" : [item.outputQty, item.outputUnit].filter(Boolean).join(" ")],
+        [timeLabel, duration(item), item.live ? "time" : ""],
+        ...(hasRm(item) ? [["% Yield", item.yieldPercent == null ? "—" : item.yieldPercent.toFixed(1) + "%", "", item.yieldPercent >= 75 ? "green" : "redt"]] : []),
+        ["ต้นทุนรวม", money(item.totalCost), item.live ? "total" : "", "", item.costSource === "estimated" ? "ประมาณการ" : item.costSource === "saved" ? "ต้นทุนจริง" : ""],
+        ["RM (วัตถุดิบ)", money(item.materialCost)],
+        ["LM (ค่าแรง)", money(item.laborCost), item.live ? "lm" : ""],
+        ["ผู้ปฏิบัติงาน", item.operators.length ? item.operators.join(", ") : "—"]
+      ]
+      const notes = []
+      if (item.isCancelled) notes.push('<p class="note note-red">งานนี้ถูกยกเลิก — ไม่นำมาคิดต้นทุนรวมวันนี้</p>')
+      if (item.costSource === "estimated" && item.totalCost != null) notes.push('<p class="note note-amber">ต้นทุนรวมเป็นประมาณการระหว่างผลิต = RM + LM จากเวลาผลิตจริง</p>')
+      if (noStandard(item)) notes.push('<p class="note note-amber">ยังไม่มีเวลามาตรฐานในระบบ</p>')
+      if (zeroPrice(item)) notes.push('<p class="note note-amber">มีการตวงสูตรแล้ว แต่ราคาวัตถุดิบยังไม่ครบจาก API</p>')
+      if (!item.isCancelled && !tracked(item)) notes.push('<p class="note note-zinc">งานนี้ยังไม่ได้คำนวณต้นทุนชั่วคราว</p>')
+      const cmpRows = [
+        ["เวลา", hm(item.standardMinutes == null ? null : item.standardMinutes * 60), duration(item), false, item.live ? "time" : ""],
+        ["RM", item.standardTotalCost != null ? money(item.materialCost) : "—", money(item.materialCost), false, ""],
+        ["LM", money(item.standardLaborCost), money(item.laborCost), false, item.live ? "lm" : ""],
+        ["รวม", money(item.standardTotalCost), money(item.totalCost), true, item.live ? "total" : ""]
+      ]
+      document.getElementById("drawer").innerHTML =
+        '<div class="overlay" data-close="1"><div class="panel" role="dialog" aria-modal="true">' +
+        '<div class="panel-head"><div><h2 style="margin:0;font-size:16px;line-height:1.35">' + item.jobName + '</h2><p class="tiny muted" style="margin-top:2px">ลำดับ ' + item.jobSequence + " · " + item.jobCode + " · 2 ตุลาคม 2569</p>" + jobBadges(item) + pills(item) + notes.join("") + '</div><button class="x" type="button" data-close="1" aria-label="ปิด">✕</button></div>' +
+        '<div class="grid">' + fields.map(([label, value, live, color, hint]) => '<div class="box"><p class="xs muted">' + label + '</p><b class="' + (color || "") + '"' + (live ? ' data-live="' + live + '"' : "") + ">" + value + "</b>" + (hint ? '<p class="tiny amber">' + hint + "</p>" : "") + "</div>").join("") + "</div>" +
+        (item.isCancelled ? "" : '<div class="block"><p class="xs muted">ต้นทุนมาตรฐาน เทียบ ต้นทุนจริง</p><table class="cmp"><thead><tr><th></th><th class="num tiny muted">มาตรฐาน</th><th class="num tiny muted">' + (item.costSource === "saved" ? "จริง" : "จริง (เรียลไทม์)") + "</th></tr></thead><tbody>" + cmpRows.map(([label, standard, actual, bold, live]) => '<tr class="' + (bold ? "bold" : "") + '"><td class="muted">' + label + '</td><td class="num">' + standard + '</td><td class="num"' + (live ? ' data-live="' + live + '"' : "") + ">" + actual + "</td></tr>").join("") + "</tbody></table>" + (item.standardTotalCost == null ? '<p class="tiny amber" style="margin-top:8px">ยังไม่มีเวลามาตรฐาน — ยังเทียบต้นทุนไม่ได้</p>' : "") + "</div>") +
+        '<div class="block"><p class="xs muted">ความถูกต้องต้นทุน (ตามกลุ่มงาน)</p><div style="margin-top:6px">' + reliabilityPill(item.costReliabilityPercent) + ' <span class="xs muted">' + CATEGORY[item.jobCategory] + "</span></div>" + checkRow("ราคาวัตถุดิบ", item.hasMaterialWeighing, need.material) + checkRow("กดเวลา", item.hasTimerData, need.timer) + checkRow("บันทึกผลผลิต", item.hasOutputQty, need.output) + "</div>" +
+        '<div class="block"><p class="xs muted">ข้อมูลครบ 3 ส่วน (ทุกงาน)</p><div style="margin-top:6px">' + reliabilityPill(Math.round((Number(item.hasMaterialWeighing) + Number(item.hasTimerData) + Number(item.hasOutputQty)) / 3 * 100)) + ' <span class="xs muted">ตวงวัตถุดิบ → กดเวลา → บันทึกผลผลิต</span></div>' + checkRow("ราคาวัตถุดิบ", item.hasMaterialWeighing, true) + checkRow("กดเวลา", item.hasTimerData, true) + checkRow("บันทึกผลผลิต", item.hasOutputQty, true) + "</div>" +
+        '<div class="block"><p class="xs muted">สถานะการกดเวลา</p><div style="margin-top:6px">' + timerPill(item.timerStatus) + "</div>" + (item.timerStatus === "warn" ? '<p class="tiny amber" style="margin-top:8px">กรุณาตรวจสอบเวลาที่ใช้ในการผลิต — มีขั้นตอนที่ไม่ได้บันทึกเวลาครบถ้วน</p>' : "") + "</div>" +
+        '<p class="sample">แถวตัวอย่างนี้โชว์: ' + item.mockReason + "</p></div></div>"
+    }
+    function closeDrawer() {
+      selectedId = null
+      document.body.style.overflow = ""
+      document.getElementById("drawer").innerHTML = ""
+    }
+    function patchLive(items) {
+      const live = items.find((item) => item.live)
+      if (!live) return
+      document.querySelectorAll('[data-live="time"]').forEach((node) => { node.textContent = duration(live) })
+      document.querySelectorAll('[data-live="lm"]').forEach((node) => { node.textContent = money(live.laborCost) })
+      document.querySelectorAll('[data-live="total"]').forEach((node) => { node.textContent = money(live.totalCost) })
+    }
+    function render() {
+      const items = displayItems()
+      paintKpis(items)
+      paintList(items)
+      if (selectedId) {
+        const item = items.find((row) => row.id === selectedId)
+        if (item) openDrawer(item)
+        else closeDrawer()
+      }
     }
     document.getElementById("chips").addEventListener("click", (event) => {
-      const key = event.target.dataset && event.target.dataset.filter
+      const key = event.target.closest("[data-filter]")
       if (!key) return
-      filter = key
+      filter = key.dataset.filter
       render()
     })
     document.querySelector("thead").addEventListener("click", (event) => {
-      const key = event.target.dataset && event.target.dataset.key
-      if (!key) return
+      const cell = event.target.closest("th")
+      if (!cell || !cell.dataset.key) return
+      const key = cell.dataset.key
       sort = { key, dir: sort.key === key && sort.dir === "asc" ? "desc" : "asc" }
       render()
     })
     document.getElementById("rows").addEventListener("click", (event) => {
       const row = event.target.closest("tr")
       if (!row) return
-      selected = row.dataset.id
+      openDrawer(displayItems().find((item) => item.id === row.dataset.id))
+    })
+    document.getElementById("cards").addEventListener("click", (event) => {
+      const card = event.target.closest("[data-id]")
+      if (!card) return
+      openDrawer(displayItems().find((item) => item.id === card.dataset.id))
+    })
+    document.getElementById("drawer").addEventListener("click", (event) => {
+      if (event.target.closest(".panel") && !event.target.closest("[data-close]")) return
+      if (event.target.closest("[data-close]") || event.target.classList.contains("overlay")) closeDrawer()
+    })
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && selectedId) closeDrawer()
+    })
+    document.getElementById("reload").addEventListener("click", () => {
+      const live = displayItems().find((item) => item.live)
+      liveAnchor.at = Date.now()
+      liveAnchor.base = live.timeUsedSeconds
       render()
     })
-    document.getElementById("reload").addEventListener("click", () => { liveAnchor.at = Date.now(); liveAnchor.base = displayItems().find((item) => item.live).timeUsedSeconds; render() })
     render()
-    setInterval(render, 1000)
+    setInterval(() => {
+      const items = displayItems()
+      paintKpis(items)
+      patchLive(items)
+    }, 1000)
   </script>
 </body>
 </html>
