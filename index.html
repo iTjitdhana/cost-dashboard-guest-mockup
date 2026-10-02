@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ต้นทุนการผลิต — หน้าตัวอย่าง</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Sarabun, "Noto Sans Thai", sans-serif; background: #fafafa; color: #18181b; }
+    header { position: sticky; top: 0; z-index: 10; height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 16px; background: #fffbeb; border-bottom: 1px solid #fde68a; }
+    h1 { font-size: 16px; margin: 0; }
+    .sub { font-size: 12px; color: #71717a; }
+    main { padding: 16px 20px 40px; }
+    .banner { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 12px; padding: 10px 12px; font-size: 13px; margin-bottom: 16px; }
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .card { background: #fff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 14px; }
+    .card p { margin: 0; }
+    .muted { color: #71717a; font-size: 12px; }
+    .big { font-size: 22px; font-weight: 700; margin-top: 6px; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .chip { border: 1px solid #e4e4e7; background: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+    .chip.on { background: #18181b; color: #fff; border-color: #18181b; }
+    table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+    th, td { border-bottom: 1px solid #f4f4f5; padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { position: sticky; top: 48px; background: #fff; cursor: pointer; font-weight: 500; }
+    tr { cursor: pointer; }
+    tr:hover td { background: #fafafa; }
+    .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .red td { background: #fef2f2; }
+    .gray td { background: #f4f4f5; }
+    .strike { text-decoration: line-through; color: #991b1b; }
+    .dim { color: #71717a; }
+    .badge { display: inline-flex; align-items: center; border-radius: 6px; padding: 1px 6px; font-size: 10px; font-weight: 700; margin-right: 4px; }
+    .b-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .b-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .b-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .tag { display: inline-block; border-radius: 999px; border: 1px solid #e4e4e7; padding: 1px 8px; font-size: 11px; margin-right: 4px; }
+    .tiny { font-size: 10px; }
+    .amber { color: #b45309; }
+    .sky { color: #0369a1; }
+    .green { color: #15803d; }
+    .redt { color: #dc2626; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.3); display: flex; align-items: flex-end; justify-content: center; }
+    .drawer { background: #fff; width: min(520px, 100%); max-height: 85vh; overflow: auto; border-radius: 16px 16px 0 0; padding: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .box { background: #f4f4f5; border-radius: 12px; padding: 12px; }
+    .note { font-size: 12px; border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
+    button.link { border: 0; background: #fff; border: 1px solid #e4e4e7; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+    @media (max-width: 900px) { .kpis { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>ต้นทุนการผลิต</h1>
+      <div class="sub">ข้อมูลตัวอย่าง · มุมมองผู้เยี่ยมชม</div>
+    </div>
+    <button class="link" id="reload" type="button">โหลดใหม่</button>
+  </header>
+  <main>
+    <div class="banner">หน้าตัวอย่างสำหรับทีมออกแบบ ตัวเลขไม่ได้มาจากฐานข้อมูล แต่เงื่อนไขการแสดงตรงกับระบบจริง รายละเอียดแต่ละแถวอยู่ในเอกสาร README.md</div>
+    <div class="kpis" id="kpis"></div>
+    <p class="muted" id="count"></p>
+    <div class="chips" id="chips"></div>
+    <div style="border:1px solid #e4e4e7;border-radius:16px;overflow:hidden">
+      <table>
+        <thead>
+          <tr>
+            <th data-key="jobSequence">ลำดับ</th>
+            <th data-key="jobName">สินค้า</th>
+            <th>สถานะ / ขั้นตอน</th>
+            <th>ผู้ปฏิบัติงาน</th>
+            <th data-key="timeUsedMinutes" class="num">เวลา</th>
+            <th data-key="materialCost" class="num">RM</th>
+            <th data-key="laborCost" class="num">LM</th>
+            <th data-key="totalCost" class="num">ต้นทุนรวม</th>
+            <th data-key="outputQty" class="num">จำนวนที่ผลิตได้</th>
+            <th data-key="yieldPercent" class="num">% Yield</th>
+            <th>หมวดหมู่</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
+  <div id="drawer"></div>
+  <script>
+    const WAGE = 450
+    const DAY_MINUTES = 495
+    const base = [
+      { id:"1", jobSequence:1, jobCode:"135126", jobName:"ซอสผัดผงกะหรี่ (ตัวอย่าง)", operators:["ป้าน้อย"], productCategories:["BNL"], jobCategory:"production", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"saved", materialCost:842.5, laborCost:180, totalCost:1022.5, hasStandardTime:true, standardTotalCost:924.32, outputQty:50, outputUnit:"แพ็ค", yieldPercent:96.2, timeUsedSeconds:95*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:true, hasTimerData:true, hasOutputQty:true, costReliabilityPercent:100, mockReason:"ต้นทุนจริง ผลิตเสร็จ ข้อมูลครบ" },
+      { id:"2", jobSequence:2, jobCode:"235225", jobName:"ลาบทอด - เจ (ตัวอย่าง)", operators:["พี่ภา","สาม","จรัญ","RD"], productCategories:["B2B"], jobCategory:"production", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"เริ่มต้นผลิต-สิ้นสุดการผลิต", costSource:"estimated", materialCost:9.45, hasStandardTime:false, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:3*3600, timeSource:"actual", live:true, timerStatus:"warn", hasMaterialWeighing:true, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:33, mockReason:"กำลังผลิต เวลาและ LM วิ่งทุกวินาที ต้องตรวจสอบเวลา และข้อมูลไม่ครบ" },
+      { id:"3", jobSequence:3, jobCode:"235045", jobName:"ห่อหมกเจ (ตัวอย่าง)", operators:["พี่ตุ่น"], productCategories:["BNL"], jobCategory:"production", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"saved", materialCost:640, laborCost:210, totalCost:850, hasStandardTime:true, standardTotalCost:900, outputQty:12, outputUnit:"กก.", yieldPercent:62.4, timeUsedSeconds:140*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:true, hasTimerData:true, hasOutputQty:true, costReliabilityPercent:100, mockReason:"Yield ต่ำกว่า 75 ตัวกรอง Yield ต่ำจะเจอแถวนี้" },
+      { id:"4", jobSequence:4, jobCode:"235032", jobName:"อกไก่หมัก (ตัวอย่าง)", operators:["สาม"], productCategories:["BUย่อย"], jobCategory:"production", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"หมัก", costSource:"estimated", materialCost:null, laborCost:38.18, totalCost:38.18, hasStandardTime:true, standardTotalCost:216.92, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:42*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:true, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:33, zeroPrice:true, mockReason:"ตวงสูตรแล้ว แต่ RM ยังไม่มีราคา" },
+      { id:"5", jobSequence:5, jobCode:"305005R", jobName:"กุ้งต้มยำ Repack (ตัวอย่าง)", operators:["จรัญ"], productCategories:["B2B"], jobCategory:"repack", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:null, costSource:"none", materialCost:null, laborCost:null, totalCost:null, hasStandardTime:true, standardTotalCost:54.55, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:null, timeSource:null, live:false, timerStatus:"no_data", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัสลงท้าย R เป็นกลุ่ม repack ยังไม่มีเวลาผลิตจึงยังไม่แสดงต้นทุนรวม" },
+      { id:"6", jobSequence:6, jobCode:"83", jobName:"หมักไก่ (ตัวอย่างยกเลิก)", operators:["พี่ภา"], productCategories:["BNL"], jobCategory:"other", isCancelled:true, isFinished:false, productionStatusName:"ยกเลิก", currentStepName:null, costSource:"none", materialCost:null, laborCost:null, totalCost:null, hasStandardTime:false, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:null, timeSource:null, live:false, timerStatus:"no_data", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"status_id 9 แถวแดง ไม่เอามารวมในการ์ดต้นทุน" },
+      { id:"7", jobSequence:7, jobCode:"A", jobName:"เบิกของส่งสาขา-ผัก (ตัวอย่าง)", operators:["ป้าน้อย","เอ"], productCategories:["เบิกของ"], jobCategory:"requisition", isCancelled:false, isFinished:true, productionStatusName:null, currentStepName:null, costSource:"estimated", materialCost:null, laborCost:134.55, totalCost:134.55, hasStandardTime:true, standardTotalCost:54.55, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:74*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:false, hasTimerData:true, hasOutputQty:false, costReliabilityPercent:100, mockReason:"ตัวแรกของรหัสเป็น A คือกลุ่มเบิกของ หมวดไม่ใช่ BNL/B2B/BU จึงเป็นแถวเทา" },
+      { id:"8", jobSequence:8, jobCode:"153005", jobName:"ผักตัวอย่าง", operators:["เอ"], productCategories:[], jobCategory:"vegetable", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"ล้าง", costSource:"estimated", materialCost:null, laborCost:40, totalCost:40, hasStandardTime:false, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:44*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัสขึ้นต้น 153005 เป็นงานทำผัก กลุ่มนี้บังคับเฉพาะเวลา" },
+      { id:"9", jobSequence:9, jobCode:"D", jobName:"ตวงสูตร (ตัวอย่าง)", operators:["พี่ภา","หน่อย"], productCategories:[], jobCategory:"formula", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:null, costSource:"estimated", materialCost:null, laborCost:180, totalCost:180, hasStandardTime:false, standardTotalCost:null, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:99*60, timeSource:"actual", live:false, timerStatus:"ok", hasMaterialWeighing:false, hasTimerData:true, hasOutputQty:false, costReliabilityPercent:100, mockReason:"ตัวแรกของรหัสเป็น D คือกลุ่มตวงสูตร" },
+      { id:"10", jobSequence:10, jobCode:"1000", jobName:"งานธุรการ (ตัวอย่าง)", operators:["โอเล่","แจ็ค"], productCategories:[], jobCategory:"other", isCancelled:false, isFinished:false, productionStatusName:null, currentStepName:"งานธุรการ", costSource:"estimated", materialCost:null, laborCost:214.55, totalCost:214.55, hasStandardTime:true, standardTotalCost:763.64, outputQty:null, outputUnit:null, yieldPercent:null, timeUsedSeconds:118*60, timeSource:"actual", live:false, timerStatus:"warn", hasMaterialWeighing:false, hasTimerData:false, hasOutputQty:false, costReliabilityPercent:0, mockReason:"รหัส 1000 เป็นกลุ่มอื่น และมีเวลามาตรฐานให้เทียบ" }
+    ]
+
+    const liveAnchor = { at: Date.now(), base: base.find((row) => row.live).timeUsedSeconds }
+    let filter = "all"
+    let sort = { key: "jobSequence", dir: "asc" }
+    let selected = null
+
+    function money(value) {
+      if (value == null) return "—"
+      return "฿" + value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    }
+    function clock(seconds) {
+      if (seconds == null || seconds <= 0) return "—"
+      const safe = Math.floor(seconds)
+      const h = Math.floor(safe / 3600)
+      const m = Math.floor((safe % 3600) / 60)
+      const s = safe % 60
+      return h + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0")
+    }
+    function hm(seconds) {
+      if (seconds == null || seconds <= 0) return "—"
+      const h = Math.floor(seconds / 3600)
+      const m = Math.floor((seconds % 3600) / 60)
+      const parts = []
+      if (h > 0) parts.push(h + " ชม.")
+      if (m > 0) parts.push(m + " น.")
+      if (parts.length === 0) parts.push("1 น.")
+      return parts.join(" ")
+    }
+    function tracked(item) {
+      return item.productCategories.some((label) => ["BNL","B2B","BU","BUย่อย"].includes(label.toUpperCase()))
+    }
+    function shownYield(item) {
+      if (item.materialCost == null || item.materialCost <= 0) return null
+      return item.yieldPercent
+    }
+    function displayItems() {
+      const now = Date.now()
+      return base.map((item) => {
+        if (!item.live) return item
+        const seconds = liveAnchor.base + Math.floor((now - liveAnchor.at) / 1000)
+        const labor = Math.round(item.operators.length * WAGE * ((seconds / 60) / DAY_MINUTES) * 100) / 100
+        const total = Math.round((labor + (item.materialCost || 0)) * 100) / 100
+        return { ...item, timeUsedSeconds: seconds, laborCost: labor, totalCost: total }
+      })
+    }
+    function filtered(items) {
+      if (filter === "warn") return items.filter((item) => item.timerStatus === "warn")
+      if (filter === "incomplete") return items.filter((item) => item.costReliabilityPercent < 100)
+      if (filter === "low_yield") return items.filter((item) => { const y = shownYield(item); return y != null && y < 75 })
+      return items
+    }
+    function sorted(items) {
+      const key = sort.key
+      return [...items].sort((a, b) => {
+        const av = key === "yieldPercent" ? shownYield(a) : a[key]
+        const bv = key === "yieldPercent" ? shownYield(b) : b[key]
+        if (av == null && bv == null) return 0
+        if (av == null) return 1
+        if (bv == null) return -1
+        const cmp = typeof av === "string" ? av.localeCompare(bv, "th") : av - bv
+        return sort.dir === "asc" ? cmp : -cmp
+      })
+    }
+    function statusHtml(item) {
+      const bits = []
+      if (item.isCancelled) bits.push('<span class="badge b-red">' + (item.productionStatusName || "ยกเลิก") + "</span>")
+      if (item.isFinished && !item.isCancelled) bits.push('<span class="badge b-green">ผลิตเสร็จแล้ว</span>')
+      if (item.live) bits.push('<span class="badge b-amber">กำลังผลิต</span>')
+      if (item.currentStepName) bits.push('<div class="tiny">' + item.currentStepName + "</div>")
+      if (!item.hasStandardTime && !item.isCancelled && item.costSource !== "saved" && tracked(item)) bits.push('<div class="tiny amber">ยังไม่มีเวลามาตรฐาน</div>')
+      if (item.zeroPrice) bits.push('<div class="tiny amber">วัตถุดิบยังไม่มีราคา</div>')
+      return bits.join("") || '<span class="dim">—</span>'
+    }
+    function render() {
+      const items = displayItems()
+      const view = sorted(filtered(items))
+      const costItems = items.filter((item) => !item.isCancelled)
+      const total = costItems.reduce((sum, item) => sum + (item.totalCost || 0), 0)
+      const rm = costItems.reduce((sum, item) => sum + (item.materialCost || 0), 0)
+      const lm = costItems.reduce((sum, item) => sum + (item.laborCost || 0), 0)
+      const saved = costItems.filter((item) => item.costSource === "saved").reduce((sum, item) => sum + (item.totalCost || 0), 0)
+      const estimated = costItems.filter((item) => item.costSource === "estimated" && item.totalCost != null).reduce((sum, item) => sum + item.totalCost, 0)
+      const yields = costItems.map(shownYield).filter((value) => value != null)
+      const avg = yields.length ? yields.reduce((sum, value) => sum + value, 0) / yields.length : null
+      const complete = costItems.filter((item) => item.costReliabilityPercent === 100).length
+      const warn = costItems.filter((item) => item.timerStatus === "warn").length
+      document.getElementById("kpis").innerHTML = [
+        ["ต้นทุนรวมวันนี้", money(total), "RM " + money(rm) + " · LM " + money(lm) + "<br>จริง " + money(saved || null) + " · ประมาณการ " + money(estimated || null)],
+        ["Yield เฉลี่ย", avg == null ? "—" : avg.toFixed(1) + "%", "เฉพาะแถวที่มี RM"],
+        ["ข้อมูลครบ", complete + " / " + costItems.length, "ความถูกต้องต้นทุนเท่ากับ 100"],
+        ["ต้องตรวจสอบ", warn > 0 ? warn + " รายการ" : "ปกติ", "สถานะเวลาเป็นต้องตรวจสอบ"]
+      ].map(([label, value, note]) => '<div class="card"><p class="muted">' + label + '</p><p class="big">' + value + '</p><p class="tiny muted">' + note + "</p></div>").join("")
+      document.getElementById("count").textContent = "แสดง " + view.length + "/" + items.length + " รายการ"
+      const counts = {
+        all: items.length,
+        warn: items.filter((item) => item.timerStatus === "warn").length,
+        incomplete: items.filter((item) => item.costReliabilityPercent < 100).length,
+        low_yield: items.filter((item) => { const y = shownYield(item); return y != null && y < 75 }).length
+      }
+      document.getElementById("chips").innerHTML = [
+        ["all","ทั้งหมด"],["warn","ต้องตรวจสอบเวลา"],["incomplete","ข้อมูลไม่ครบ"],["low_yield","Yield ต่ำ"]
+      ].map(([key, label]) => '<button class="chip' + (filter === key ? " on" : "") + '" data-filter="' + key + '">' + label + " " + counts[key] + "</button>").join("")
+      document.getElementById("rows").innerHTML = view.map((item) => {
+        const rowClass = item.isCancelled ? "red" : tracked(item) ? "" : "gray"
+        const nameClass = item.isCancelled ? "strike" : tracked(item) ? "" : "dim"
+        const time = item.live ? clock(item.timeUsedSeconds) : hm(item.timeUsedSeconds)
+        const source = item.costSource === "saved" ? '<div class="tiny sky">ต้นทุนจริง</div>' : item.costSource === "estimated" ? '<div class="tiny amber">ประมาณการ</div>' : ""
+        const standard = item.standardTotalCost != null ? '<div class="tiny muted">มาตรฐาน ' + money(item.standardTotalCost) + "</div>" : ""
+        const yieldText = shownYield(item) == null ? "" : '<span class="' + (shownYield(item) >= 75 ? "green" : "redt") + '">' + shownYield(item).toFixed(1) + "%</span>"
+        const tags = item.productCategories.map((label) => '<span class="tag">' + label + "</span>").join("") || '<span class="dim">—</span>'
+        return '<tr data-id="' + item.id + '" class="' + rowClass + '"><td class="num">' + item.jobSequence + '</td><td><div class="' + nameClass + '"><b>' + item.jobName + '</b></div><div class="tiny muted">' + item.jobCode + '</div></td><td>' + statusHtml(item) + '</td><td>' + item.operators.join(", ") + '</td><td class="num">' + time + (item.timeSource === "actual" ? '<div class="tiny">เวลาผลิต</div>' : "") + '</td><td class="num">' + money(item.materialCost) + (item.zeroPrice ? '<div class="tiny amber">วัตถุดิบยังไม่มีราคา</div>' : "") + '</td><td class="num">' + money(item.laborCost) + '</td><td class="num"><b>' + money(item.totalCost) + "</b>" + source + standard + '</td><td class="num">' + (item.outputQty == null ? "—" : item.outputQty + " " + (item.outputUnit || "")) + '</td><td class="num">' + yieldText + "</td><td>" + tags + "</td></tr>"
+      }).join("")
+      if (selected) openDrawer(displayItems().find((item) => item.id === selected) || null)
+    }
+    function openDrawer(item) {
+      selected = item && item.id
+      const host = document.getElementById("drawer")
+      if (!item) { host.innerHTML = ""; return }
+      host.innerHTML = '<div class="overlay"><div class="drawer"><h2 style="margin:0">' + item.jobName + '</h2><p class="muted">ลำดับ ' + item.jobSequence + " · " + item.jobCode + " · กลุ่ม " + item.jobCategory + '</p><div class="note" style="background:#fffbeb">แถวตัวอย่างนี้โชว์: ' + item.mockReason + '</div>' + statusHtml(item) + '<div class="grid" style="margin-top:12px"><div class="box"><div class="muted">RM</div><b>' + money(item.materialCost) + '</b></div><div class="box"><div class="muted">LM</div><b>' + money(item.laborCost) + '</b></div><div class="box"><div class="muted">ต้นทุนรวม</div><b>' + money(item.totalCost) + '</b></div><div class="box"><div class="muted">มาตรฐาน</div><b>' + money(item.standardTotalCost) + '</b></div></div><p class="muted">ความถูกต้องต้นทุน ' + item.costReliabilityPercent + '% · ราคาวัตถุดิบ ' + (item.hasMaterialWeighing ? "มี" : "ไม่มี") + " · เวลาครบ " + (item.hasTimerData ? "มี" : "ไม่มี") + " · ผลผลิต " + (item.hasOutputQty ? "มี" : "ไม่มี") + '</p><button class="link" id="close" type="button">ปิด</button></div></div>'
+      host.querySelector(".overlay").addEventListener("click", (event) => { if (event.target === host.querySelector(".overlay")) { selected = null; render() } })
+      host.querySelector("#close").addEventListener("click", () => { selected = null; render() })
+    }
+    document.getElementById("chips").addEventListener("click", (event) => {
+      const key = event.target.dataset && event.target.dataset.filter
+      if (!key) return
+      filter = key
+      render()
+    })
+    document.querySelector("thead").addEventListener("click", (event) => {
+      const key = event.target.dataset && event.target.dataset.key
+      if (!key) return
+      sort = { key, dir: sort.key === key && sort.dir === "asc" ? "desc" : "asc" }
+      render()
+    })
+    document.getElementById("rows").addEventListener("click", (event) => {
+      const row = event.target.closest("tr")
+      if (!row) return
+      selected = row.dataset.id
+      render()
+    })
+    document.getElementById("reload").addEventListener("click", () => { liveAnchor.at = Date.now(); liveAnchor.base = displayItems().find((item) => item.live).timeUsedSeconds; render() })
+    render()
+    setInterval(render, 1000)
+  </script>
+</body>
+</html>
